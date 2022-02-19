@@ -1,6 +1,8 @@
 ### POST Book and return total time
 POST {{host}}/api/book
-Accept: application/json
+Content-Type: application/json
+
+< ../templates/bookCar.json
 
 > {%
 client.test("Request executed successfully", function() {
@@ -10,7 +12,7 @@ client.test("Request executed successfully", function() {
 
 ### POST Drive cars on one time unit
 POST {{host}}/api/tick
-Accept: application/json
+Content-Type: application/json
 
 > {%
 client.test("Request executed successfully", function() {
@@ -20,7 +22,7 @@ client.test("Request executed successfully", function() {
 
 ### PUT Reset all cars
 PUT {{host}}/api/reset
-Accept: application/json
+Content-Type: application/json
 
 > {%
 client.test("Request executed successfully", function() {
