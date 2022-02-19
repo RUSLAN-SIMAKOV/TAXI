@@ -7,20 +7,22 @@ import org.springframework.stereotype.Service;
 import ruslan.simakov.taxi.model.Car;
 import ruslan.simakov.taxi.repository.CarRepository;
 
+import java.util.List;
+
 import static java.util.stream.Stream.generate;
 
 @Service
 @RequiredArgsConstructor
 public class CarCreationService {
 
-    @Value("${parameter.car-quantity:3}")
-    private int carQuantity;
+    @Value("${parameter.car-quantity}")
+    public int carQuantity;
 
-    @Value("${parameter.car-position.x:0}")
-    private int positionX;
+    @Value("${parameter.car-position.x}")
+    public int positionX;
 
-    @Value("${parameter.car-position.y:0}")
-    private int positionY;
+    @Value("${parameter.car-position.y}")
+    public int positionY;
 
     private final CarRepository carRepository;
 
@@ -29,6 +31,7 @@ public class CarCreationService {
         carRepository.saveAll(generate(Car::new)
                 .limit(carQuantity)
                 .map(car -> car.setIsBooked(false)
+                        .setWithPassenger(false)
                         .setPositionX(positionX)
                         .setPositionY(positionY))
                 .toList());

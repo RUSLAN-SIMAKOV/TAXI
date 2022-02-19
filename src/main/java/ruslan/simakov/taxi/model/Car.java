@@ -26,11 +26,20 @@ public class Car {
     @Column(name = "is_booked")
     private Boolean isBooked;
 
+    @Column(name = "with_Passenger")
+    private Boolean withPassenger;
+
     @Column(name = "position_x")
     private Integer positionX;
 
     @Column(name = "position_y")
     private Integer positionY;
+
+    @Column(name = "source_x")
+    private Integer sourceX;
+
+    @Column(name = "source_y")
+    private Integer sourceY;
 
     @Column(name = "destination_x")
     private Integer destinationX;
