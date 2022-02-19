@@ -21,7 +21,7 @@ public class Car {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "car_id")
-    private Integer carId;
+    private Long carId;
 
     @Column(name = "is_booked")
     private Boolean isBooked;
@@ -30,20 +30,20 @@ public class Car {
     private Boolean withPassenger;
 
     @Column(name = "position_x")
-    private Integer positionX;
+    private Long positionX;
 
     @Column(name = "position_y")
-    private Integer positionY;
+    private Long positionY;
 
     @Column(name = "source_x")
-    private Integer sourceX;
+    private Long sourceX;
 
     @Column(name = "source_y")
-    private Integer sourceY;
+    private Long sourceY;
 
     @Column(name = "destination_x")
-    private Integer destinationX;
+    private Long destinationX;
 
     @Column(name = "destination_y")
-    private Integer destinationY;
+    private Long destinationY;
 }

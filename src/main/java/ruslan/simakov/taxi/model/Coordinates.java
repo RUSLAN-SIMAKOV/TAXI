@@ -5,8 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public record Coordinates(
 
         @JsonProperty("x")
-        Integer coordinateX,
+        Long coordinateX,
 
         @JsonProperty("y")
-        Integer coordinateY) {
+        Long coordinateY) {
 }

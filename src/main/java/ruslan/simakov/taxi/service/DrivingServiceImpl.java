@@ -11,32 +11,33 @@ import ruslan.simakov.taxi.model.Coordinates;
 import ruslan.simakov.taxi.repository.CarRepository;
 
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static java.lang.Integer.compare;
-import static java.lang.Math.absExact;
+import static java.lang.Long.compare;
+import static java.lang.Math.abs;
 import static java.util.function.Predicate.not;
 
 @Service
 @RequiredArgsConstructor
 public class DrivingServiceImpl implements DrivingService {
 
+    private final CarRepository carRepository;
+
     @Value("${parameter.car-quantity}")
-    public int carQuantity;
+    private long carQuantity;
 
     @Value("${parameter.car-position.x}")
-    public int positionX;
+    private long positionX;
 
     @Value("${parameter.car-position.y}")
-    public int positionY;
-    private final CarRepository carRepository;
+    private long positionY;
 
     @Override
     public BookingResponse bookCar(BookingRequest request) {
-        BookingResponse response = findNearestFreeCarWithDistance(request);
-        return response;
+        return findNearestFreeCarWithDistance(request);
     }
 
     private BookingResponse findNearestFreeCarWithDistance(BookingRequest r) {
@@ -53,24 +54,29 @@ public class DrivingServiceImpl implements DrivingService {
         return StreamSupport.stream(carRepository.findAll().spliterator(), false);
     }
 
-    private Comparator<Pair<Car, Integer>> getDistanceToCarComparator() {
+    private Comparator<Pair<Car, Long>> getDistanceToCarComparator() {
         return (p1, p2) -> p1.getSecond().equals(p2.getSecond()) ?
                 compare(p1.getFirst().getCarId(), p2.getFirst().getCarId()) :
                 compare(p1.getSecond(), p2.getSecond());
     }
 
-    private Function<Car, Pair<Car, Integer>> createPairCarDistance(BookingRequest r) {
-        return c -> Pair.of(c, absExact(r.source().coordinateX() - c.getPositionX()) +
-                absExact(r.source().coordinateY() - c.getPositionY()));
+    private Function<Car, Pair<Car, Long>> createPairCarDistance(BookingRequest r) {
+        return c -> Pair.of(c, abs(r.source().coordinateX() - c.getPositionX()) +
+                abs(r.source().coordinateY() - c.getPositionY()));
     }
 
-    private BookingResponse createBookingResponse(Pair<Car, Integer> p, BookingRequest r) {
-        return new BookingResponse(p.getFirst().getCarId(), p.getSecond() +
-                absExact(r.destination().coordinateX() - p.getFirst().getSourceX()) +
-                absExact(r.destination().coordinateY() - p.getFirst().getSourceY()));
+    private BookingResponse createBookingResponse(Pair<Car, Long> p, BookingRequest r) {
+         var response = new BookingResponse(p.getFirst().getCarId(), p.getSecond() +
+                abs(r.destination().coordinateX() - p.getFirst().getSourceX()) +
+                abs(r.destination().coordinateY() - p.getFirst().getSourceY()));
+         if (response.totalTime() == 0) {
+             finishDriving(p.getFirst());
+             carRepository.save(p.getFirst());
+         }
+         return response;
     }
 
-    private Pair<Car, Integer> bookNearestCar(Pair<Car, Integer> pair, BookingRequest request) {
+    private Pair<Car, Long> bookNearestCar(Pair<Car, Long> pair, BookingRequest request) {
         carRepository.save(pair.getFirst()
                 .setIsBooked(true)
                 .setWithPassenger(isPassengerNearCar(pair.getFirst(), request.source()))
@@ -93,18 +99,18 @@ public class DrivingServiceImpl implements DrivingService {
                     if (c.getWithPassenger()) {
                         int direction = compare(c.getDestinationX(), c.getPositionX());
                         c.setPositionX(c.getPositionX() + direction);
-                        if (direction != 0) {
+                        if (direction != 0 && !Objects.equals(c.getDestinationX(), c.getPositionX())) {
                             return;
                         }
                         direction = compare(c.getDestinationY(), c.getPositionY());
                         c.setPositionY(c.getPositionY() + direction);
                         if (c.getDestinationY().equals(c.getPositionY())) {
-                            resetCar(c);
+                            finishDriving(c);
                         }
                     } else {
                         int direction = compare(c.getSourceX(), c.getPositionX());
                         c.setPositionX(c.getPositionX() + direction);
-                        if (direction != 0) {
+                        if (direction != 0 && !Objects.equals(c.getSourceX(), c.getPositionX())) {
                             return;
                         }
                         direction = compare(c.getSourceY(), c.getPositionY());
@@ -115,7 +121,6 @@ public class DrivingServiceImpl implements DrivingService {
                     }
                 })
                 .forEach(carRepository::save);
-
     }
 
     @Override
@@ -128,6 +133,15 @@ public class DrivingServiceImpl implements DrivingService {
                 .setWithPassenger(false)
                 .setPositionX(positionX)
                 .setPositionY(positionY)
+                .setDestinationX(null)
+                .setDestinationY(null)
+                .setSourceX(null)
+                .setSourceY(null);
+    }
+
+    private Car finishDriving(Car c) {
+        return c.setIsBooked(false)
+                .setWithPassenger(false)
                 .setDestinationX(null)
                 .setDestinationY(null)
                 .setSourceX(null)

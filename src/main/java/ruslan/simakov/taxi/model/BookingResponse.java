@@ -5,8 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public record BookingResponse(
 
         @JsonProperty("car_id")
-        Integer carId,
+        Long carId,
 
         @JsonProperty("total_time")
-        Integer totalTime) {
+        Long totalTime) {
 }
