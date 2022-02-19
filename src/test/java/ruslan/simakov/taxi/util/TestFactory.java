@@ -16,6 +16,20 @@ public class TestFactory {
     public static long EIGHT = 8L;
     public static long INTEGER_MIN_VALUE = -2147483648L;
     public static long INTEGER_MAX_VALUE = 2147483647L;
+    public static String BOOKING_REQUEST = """
+            {"source": {"x": -1, "y": -1}, "destination": {"x": 1, "y": 1}}""";
+    public static String REQUEST_FOR_ONE_TICK = """
+            {"source": {"x": 0, "y": 0}, "destination": {"x": 1, "y": 0}}""";
+    public static String REQUEST_FOR_BOOKING_FIRST_CAR = """
+            {"source": {"x": 1, "y": 0}, "destination": {"x": 2, "y": 0}}""";
+    public static String RESPONSE_FOR_FIRST_CAR = """
+            {"car_id":1,"total_time":6}""";
+    public static String RESPONSE_FOR_FIRST_CAR_IN_ONE_TICK = """
+            {"car_id":1,"total_time":1}""";
+    public static String RESPONSE_FOR_SECOND_CAR = """
+            {"car_id":2,"total_time":6}""";
+    public static String RESPONSE_FOR_THIRD_CAR = """
+            {"car_id":3,"total_time":6}""";
 
     public static Car createCar() {
         return new Car()

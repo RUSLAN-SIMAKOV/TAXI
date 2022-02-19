@@ -66,14 +66,14 @@ public class DrivingServiceImpl implements DrivingService {
     }
 
     private BookingResponse createBookingResponse(Pair<Car, Long> p, BookingRequest r) {
-         var response = new BookingResponse(p.getFirst().getCarId(), p.getSecond() +
+        var response = new BookingResponse(p.getFirst().getCarId(), p.getSecond() +
                 abs(r.destination().coordinateX() - p.getFirst().getSourceX()) +
                 abs(r.destination().coordinateY() - p.getFirst().getSourceY()));
-         if (response.totalTime() == 0) {
-             finishDriving(p.getFirst());
-             carRepository.save(p.getFirst());
-         }
-         return response;
+        if (response.totalTime() == 0) {
+            finishDriving(p.getFirst());
+            carRepository.save(p.getFirst());
+        }
+        return response;
     }
 
     private Pair<Car, Long> bookNearestCar(Pair<Car, Long> pair, BookingRequest request) {
@@ -97,30 +97,38 @@ public class DrivingServiceImpl implements DrivingService {
                 .filter(Car::getIsBooked)
                 .peek(c -> {
                     if (c.getWithPassenger()) {
-                        int direction = compare(c.getDestinationX(), c.getPositionX());
-                        c.setPositionX(c.getPositionX() + direction);
-                        if (direction != 0 && !Objects.equals(c.getDestinationX(), c.getPositionX())) {
-                            return;
-                        }
-                        direction = compare(c.getDestinationY(), c.getPositionY());
-                        c.setPositionY(c.getPositionY() + direction);
-                        if (c.getDestinationY().equals(c.getPositionY())) {
-                            finishDriving(c);
-                        }
+                        moveOnOneTimeUnitToDestination(c);
                     } else {
-                        int direction = compare(c.getSourceX(), c.getPositionX());
-                        c.setPositionX(c.getPositionX() + direction);
-                        if (direction != 0 && !Objects.equals(c.getSourceX(), c.getPositionX())) {
-                            return;
-                        }
-                        direction = compare(c.getSourceY(), c.getPositionY());
-                        c.setPositionY(c.getPositionY() + direction);
-                        if (c.getSourceY().equals(c.getPositionY())) {
-                            c.setWithPassenger(true);
-                        }
+                        moveOnOneTimeUnitToSource(c);
                     }
                 })
                 .forEach(carRepository::save);
+    }
+
+    private void moveOnOneTimeUnitToSource(Car c) {
+        int direction = compare(c.getSourceX(), c.getPositionX());
+        c.setPositionX(c.getPositionX() + direction);
+        if (direction != 0 && !Objects.equals(c.getSourceX(), c.getPositionX())) {
+            return;
+        }
+        direction = compare(c.getSourceY(), c.getPositionY());
+        c.setPositionY(c.getPositionY() + direction);
+        if (c.getSourceY().equals(c.getPositionY())) {
+            c.setWithPassenger(true);
+        }
+    }
+
+    private void moveOnOneTimeUnitToDestination(Car c) {
+        int direction = compare(c.getDestinationX(), c.getPositionX());
+        c.setPositionX(c.getPositionX() + direction);
+        if (direction != 0 && !Objects.equals(c.getDestinationX(), c.getPositionX())) {
+            return;
+        }
+        direction = compare(c.getDestinationY(), c.getPositionY());
+        c.setPositionY(c.getPositionY() + direction);
+        if (c.getDestinationY().equals(c.getPositionY())) {
+            finishDriving(c);
+        }
     }
 
     @Override
@@ -139,8 +147,8 @@ public class DrivingServiceImpl implements DrivingService {
                 .setSourceY(null);
     }
 
-    private Car finishDriving(Car c) {
-        return c.setIsBooked(false)
+    private Car finishDriving(Car car) {
+        return car.setIsBooked(false)
                 .setWithPassenger(false)
                 .setDestinationX(null)
                 .setDestinationY(null)

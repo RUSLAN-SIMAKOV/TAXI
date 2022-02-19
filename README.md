@@ -12,16 +12,7 @@ This is a simple representation of taxi service
 
 ## Description
 
-The store model has role based authorization and authentication with USER and ADMIN roles. <br />
-
-Registration, log in/log out options are also implemented.
-Password storing securely in DB as hash-password (SHA-512 + salt).
-
-USER can look through the list of products, add chosen product to a cart, delete items from cart
-and complete an order.
-USER also can review all completed orders. <br />
-ADMIN can add/delete products to/from a list of products and overview the list of all users.
-
+API documented >resources/rest/endpoints.http
 
 ### Prerequisites
 
@@ -36,7 +27,6 @@ To run this project you need to install next software:
 *  H2 2.1.210
 *  Lombok 1.18.22
 *  JUnit 5.8.2 
-*  log4j 1.2.17
 
 ## Deployment
 
@@ -44,7 +34,7 @@ Add this project to your IDE as Maven project.
 Add Java SDK 17 in project structure.
 Now You can run service on port 8080, by clicking "green arrow" in your IDE
 Or you can use docker. Create an executable jar file:
-```python
+```
 $> mvn clean package
 ```
 To create an image from Dockerfile, run ‘docker build':
@@ -56,6 +46,12 @@ Finally, You're able to run the container from image:
 $> docker run -p8080:8080 taxi:latest
 ```
 This will start application in Docker, and You can access it from the host machine at localhost:8080.
+
+Service used IN_MEMORY database H2. You can find it http://localhost:8080/taxi-console/
+Use URL jdbc:h2:mem:taxidb
+Login: sa
+Password: <leave field empty>
+Tap connect button.
 Enjoy to test everything)
 
 ## Author
